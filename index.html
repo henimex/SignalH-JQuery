@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="./files/signalr.min.js"></script>
+    <script src="./files/jquery.min.js"></script>
+    <title>SignalR & Signal-H</title>
+
+    <script>
+        $(document).ready(() => {
+            let count = 0;
+            const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:5001/myhub")
+            .withAutomaticReconnect([1000,1000,2000,3000,5000]) //Default 0-2-10-30
+            .build();
+
+            //connection.start();
+            async function start() {
+                try {
+                    await connection.start();
+                    if (connection.M == "Connected") {
+                        console.log(`Connection Established After ${count} Tries`)
+                        count = 0;
+                    }
+                    console.log(connection)
+                } catch (error) {
+                    count +=1;
+                    console.log(`Reconnecting in 2 Seconds... Retry : ${count}`)
+                    setTimeout(() => start(), 2000);
+                }
+            }
+
+            start();
+
+            const status = $("#status");
+            connection.onreconnecting(error => {
+                status.css("background-color","orange");
+                status.css("color","white");
+                status.html("Connection In Progress");
+                status.fadeIn(2000, () => {
+                    setTimeout(() => {
+                        status.fadeOut(2000)
+                    }, 2000)
+                })
+
+                console.log('Reconnecting Triggered');
+                console.log(error)
+            })
+
+            connection.onreconnected(process => {
+                status.css("background-color","green");
+                status.css("color","white");
+                status.html("Reconnected");
+                status.fadeIn(2000, () => {
+                    setTimeout(() => {
+                        status.fadeOut(2000)
+                    }, 2000)
+                })
+
+                console.log('Reconnected');
+                console.log('Connection ID : ', process);
+            })
+
+            connection.onclose(process => {
+                status.css("background-color","red");
+                status.css("color","white");
+                status.html("Connection Failed");
+                status.fadeIn(2000, () => {
+                    setTimeout(() => {
+                        status.fadeOut(2000)
+                    }, 2000)
+                })
+
+                console.log('Connection Closed');
+                console.log('Connection ID : ', process);
+            })
+
+            $("#btnGonder").click(() => {
+                let message = $("#txtMsg").val();
+                connection.invoke("SendMessageAsync", message)
+                .catch(error => console.log(`Hata Alindi :${error}`));
+            });
+            
+            connection.on("receivedMessage", data => {
+                $("#messages").append(data + "<br>")
+            });
+
+            
+        });
+    </script> 
+</head>
+<body>
+    <h1>Test Page With SignalR Technology</h1>
+    <input type="text" id="txtMsg">
+    <button id="btnGonder">Gönder</button>
+
+    <h4>Status:</h4>
+    <div id="status" style="display: none;">
+    </div>
+
+    <div id="messages"></div>
+</body>
+</html>
