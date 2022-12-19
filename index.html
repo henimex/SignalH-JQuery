@@ -13,6 +13,14 @@
             .withAutomaticReconnect([1000,1000,2000,3000,5000]) //Default 0-2-10-30
             .build();
 
+            function animation() {
+                status.fadeIn(2000, () => {
+                    setTimeout(() => {
+                        status.fadeOut(2000)
+                    }, 2000)
+                });
+            }
+
             //connection.start();
             async function start() {
                 try {
@@ -36,11 +44,7 @@
                 status.css("background-color","orange");
                 status.css("color","white");
                 status.html("Connection In Progress");
-                status.fadeIn(2000, () => {
-                    setTimeout(() => {
-                        status.fadeOut(2000)
-                    }, 2000)
-                })
+                animation();
 
                 console.log('Reconnecting Triggered');
                 console.log(error)
@@ -50,11 +54,7 @@
                 status.css("background-color","green");
                 status.css("color","white");
                 status.html("Reconnected");
-                status.fadeIn(2000, () => {
-                    setTimeout(() => {
-                        status.fadeOut(2000)
-                    }, 2000)
-                })
+                animation();
 
                 console.log('Reconnected');
                 console.log('Connection ID : ', process);
@@ -64,11 +64,7 @@
                 status.css("background-color","red");
                 status.css("color","white");
                 status.html("Connection Failed");
-                status.fadeIn(2000, () => {
-                    setTimeout(() => {
-                        status.fadeOut(2000)
-                    }, 2000)
-                })
+                animation();
 
                 console.log('Connection Closed');
                 console.log('Connection ID : ', process);
@@ -84,7 +80,29 @@
                 $("#messages").append(data + "<br>")
             });
 
+            connection.on("userJoined", data => {
+                status.css("background-color","green");
+                status.css("color","white");
+                status.html(`User Joined : ${data}`)
+                animation();
+                console.log(`User Joined : ${data}`)
+            })
+
+            connection.on("userLeaved", data => {
+                status.html(`User Leaved : ${data}`)
+                status.css("background-color","red");
+                status.css("color","white");
+                animation();
+                console.log(`User Leaved : ${data}`)
+            })
             
+            connection.on("allClients", data => {
+                let text = "";
+                $.each(data, (index, item) => {
+                    text += `<li>${item}</li>`;
+                });
+                $("#client").html(text);
+            })
         });
     </script> 
 </head>
@@ -92,6 +110,11 @@
     <h1>Test Page With SignalR Technology</h1>
     <input type="text" id="txtMsg">
     <button id="btnGonder">Gönder</button>
+
+    <h4>Clients</h4>
+    <div>
+        <ul id="client">1</ul>
+    </div>
 
     <h4>Status:</h4>
     <div id="status" style="display: none;">
