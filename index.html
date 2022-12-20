@@ -96,7 +96,7 @@
                 console.log(`User Leaved : ${data}`)
             })
             
-            connection.on("allClients", data => {
+            connection.on("getClientsList", data => {
                 let text = "";
                 $.each(data, (index, item) => {
                     text += `<li>${item}</li>`;
