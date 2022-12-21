@@ -118,13 +118,31 @@
                 $("#client").html(text);
             })
 
+            let _connectionId = "";
             connection.on("getConnectionId", data => {
+                _connectionId = data;
                 console.log("Your Connection Id is : ", data)
                 $("#connectionId").html(`Your Connection Id is : ${data}`)
             })
             
             connection.on("sendAllExcept", data => {
                 $("#messages").append(data + "<br>")
+            });
+
+            $("#btnGrubaGir").click(() => {
+                let groupName = $("input[name=group]:checked").val();
+                connection.invoke("addGroup", _connectionId, groupName).catch(error => console.log(error));
+            })
+
+            $("#btnGonder3").click(() => {
+                console.log("test")
+                let message = $("#txtMsg").val();
+                let groupName = $("input[name=group]:checked").val();
+                connection.invoke("sendToGroup", message, groupName).catch(error => console.log(error));
+            });
+
+            connection.on("sendGrup", data => {
+                $("#messages").append("Group Msj: " + data + "<br>")
             });
 
         });
@@ -138,15 +156,27 @@
     <label style="font-weight: bold; color:rgb(60, 197, 6);" for="any" id="connectionId"></label>
     <hr>
 
+    <input type="radio" name="group" value="A"> A
+    <input type="radio" name="group" value="B"> B
+    <input type="radio" name="group" value="C"> C
+    <button id="btnGrubaGir">Gruba Gir</button>
+    <br>
+    <hr>
+
     <input type="text" id="txtMsg">
     <button id="btnGonder">Gönder</button>
+    <br>
+    <hr>
 
     <textarea name="" id="connectionIds" cols="30" rows="10"></textarea>
+    <br>
     <button id="btnGonder2">Gönder Method 2</button>
+    <button id="btnGonder3">Gruba Gönder</button>
+    <hr>
     
     <h4>Clients</h4>
     <div>
-        <ul id="client">Not Active Clients Connection Could Be Offline</ul>
+        <ul id="client">Not Active Clients Server Could Be Offline</ul>
     </div>
 
     <h4>Status:</h4>
