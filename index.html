@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <script src="./files/signalr.min.js"></script>
     <script src="./files/jquery.min.js"></script>
@@ -9,9 +10,9 @@
         $(document).ready(() => {
             let count = 0;
             const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:5001/myhub")
-            .withAutomaticReconnect([1000,1000,2000,3000,5000]) //Default 0-2-10-30
-            .build();
+                .withUrl("https://localhost:5001/messagehub")
+                .withAutomaticReconnect([1000, 1000, 2000, 3000, 5000]) //Default 0-2-10-30
+                .build();
 
             function animation() {
                 status.fadeIn(2000, () => {
@@ -31,7 +32,7 @@
                     }
                     console.log(connection)
                 } catch (error) {
-                    count +=1;
+                    count += 1;
                     console.log(`Reconnecting in 2 Seconds... Retry : ${count}`)
                     setTimeout(() => start(), 2000);
                 }
@@ -41,8 +42,8 @@
 
             const status = $("#status");
             connection.onreconnecting(error => {
-                status.css("background-color","orange");
-                status.css("color","white");
+                status.css("background-color", "orange");
+                status.css("color", "white");
                 status.html("Connection In Progress");
                 animation();
 
@@ -51,8 +52,8 @@
             })
 
             connection.onreconnected(process => {
-                status.css("background-color","green");
-                status.css("color","white");
+                status.css("background-color", "green");
+                status.css("color", "white");
                 status.html("Reconnected");
                 animation();
 
@@ -61,8 +62,8 @@
             })
 
             connection.onclose(process => {
-                status.css("background-color","red");
-                status.css("color","white");
+                status.css("background-color", "red");
+                status.css("color", "white");
                 status.html("Connection Failed");
                 animation();
 
@@ -72,17 +73,30 @@
 
             $("#btnGonder").click(() => {
                 let message = $("#txtMsg").val();
-                connection.invoke("SendMessageAsync", message)
-                .catch(error => console.log(`Hata Alindi :${error}`));
+                connection.invoke("SendMsg", message)
+                    .catch(error => console.log(`Hata Alindi :${error}`));
             });
-            
+
+            $("#btnGonder2").click(() => {
+                let message = $("#txtMsg").val();
+                let conId = $("#connectionIds").val().split(",");
+                
+                //Sunucu Uzerinde Arayacak Method()
+                connection.invoke("SendToClient", conId, message)
+                    .catch(error => console.log(`Hata Alindi :${error}`));
+            });
+
             connection.on("receivedMessage", data => {
                 $("#messages").append(data + "<br>")
             });
 
+            connection.on("reciveMsj", data => {
+                $("#messages").append(data + "<br>")
+            });
+
             connection.on("userJoined", data => {
-                status.css("background-color","green");
-                status.css("color","white");
+                status.css("background-color", "green");
+                status.css("color", "white");
                 status.html(`User Joined : ${data}`)
                 animation();
                 console.log(`User Joined : ${data}`)
@@ -90,12 +104,12 @@
 
             connection.on("userLeaved", data => {
                 status.html(`User Leaved : ${data}`)
-                status.css("background-color","red");
-                status.css("color","white");
+                status.css("background-color", "red");
+                status.css("color", "white");
                 animation();
                 console.log(`User Leaved : ${data}`)
             })
-            
+
             connection.on("getClientsList", data => {
                 let text = "";
                 $.each(data, (index, item) => {
@@ -103,14 +117,33 @@
                 });
                 $("#client").html(text);
             })
+
+            connection.on("getConnectionId", data => {
+                console.log("Your Connection Id is : ", data)
+                $("#connectionId").html(`Your Connection Id is : ${data}`)
+            })
+            
+            connection.on("sendAllExcept", data => {
+                $("#messages").append(data + "<br>")
+            });
+
         });
-    </script> 
+    </script>
 </head>
+
 <body>
     <h1>Test Page With SignalR Technology</h1>
+
+    <h3>ID Info</h3>
+    <label style="font-weight: bold; color:rgb(60, 197, 6);" for="any" id="connectionId"></label>
+    <hr>
+
     <input type="text" id="txtMsg">
     <button id="btnGonder">Gönder</button>
 
+    <textarea name="" id="connectionIds" cols="30" rows="10"></textarea>
+    <button id="btnGonder2">Gönder Method 2</button>
+    
     <h4>Clients</h4>
     <div>
         <ul id="client">Not Active Clients Connection Could Be Offline</ul>
@@ -122,4 +155,5 @@
 
     <div id="messages"></div>
 </body>
+
 </html>
