@@ -26,7 +26,7 @@
             async function start() {
                 try {
                     await connection.start();
-                    if (connection.M == "Connected") {
+                    if (connection.M === "Connected") {
                         console.log(`Connection Established After ${count} Tries`)
                         count = 0;
                     }

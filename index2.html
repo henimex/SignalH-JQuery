@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+
+<script src="./files/signalr.min.js"></script>
+<script src="./files/jquery.min.js"></script>
+<script src="./files/bootstrap.min.js"></script>
+
+<link rel="stylesheet" href="/styles/bootstrap.min.css">
+<link rel="stylesheet" href="/styles/style.css">
+
+<head>
+    <script>
+        $(document).ready(() => {
+
+            const conneciton = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:5001/chathub")
+                .build();
+
+                conneciton.start();
+
+            $(".disabled").attr("disabled", "disabled");
+            $(".users").click(function () {
+                $(".users").each((index, item) => {
+                    item.classList.remove("active");
+                });
+                $(this).addClass("active");
+            });
+
+            function activate() {
+                $(".disabled").removeAttr("disabled");
+            }
+
+            $('#btnGirisYap').click(() => {
+                const nick = $('#txtNickName').val();
+                conneciton.invoke("GetNickName", nick).catch(error => console.log("GetNickName yordam cagirma hatasi : ", error));
+                activate();
+            });
+
+            conneciton.on("clientJoined", data => {
+                console.log("js tetiklendi gelen data ", data)
+                $("#clientDurumMesajlari").html(`${data} Giriş Yaptı.`)
+                $("#clientDurumMesajlari").fadeIn(2000, () => {
+                    setTimeout(() => {
+                        $("#clientDurumMesajlari").fadeOut(2000)
+                    }, 2000)
+                })
+            })
+
+
+        })
+    </script>
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" class="form-control form-control-lg-disabled" placeholder="Oda Adı">
+                    <button type="button" class="btn btn-info rightButton disabled">Oda Oluştur</button>
+                    <select size="5" style="width:100%;" class="form-select disabled" multiple>
+                        <option selected value="-1">Odalar</option>
+                    </select>
+                    <button type="button" class="btn btn-primary rightButton disabled"> Seçili Odalara Gir</button>
+                    <br><br><br>
+                    <div class="list-group">
+                        <a class="list-group-item list-group-item-action users active">Tümü</a>
+                        <a class="list-group-item list-group-item-action users" aria-current="true">Cras justo odio</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-success" id="clientDurumMesajlari" style="display: none;">
+                        Alert
+                    </div>
+                    <textarea class="form-control" style="margin-top:5px;" placeholder="İletilecek Mesajı yazınız"
+                        rows="3"></textarea>
+                    <button type="button" class="btn btn-light rightButton" id="btnGonder">Gönder</button>
+                    <br><br><br>
+
+                    <div class="list-group">
+                        <a class="list-group-item list-group-item-action" aria-current="true">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Ahmet</h5>
+                                <h5 class="mb-2">Sen</h5>
+                            </div>
+                            <p class="mb-1">Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis aspernatur
+                                officiis animi rem deleniti, distinctio quo assumenda minus eaque blanditiis repellat,
+                                totam magni nemo alias tempora facilis laboriosam ullam consequatur!</p>
+                            <small>Lorem ipsum dolor sit amet consectetur adipisicing elit. </small>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control form-control-lg" placeholder="Adınız/Nick" id="txtNickName">
+                    <button type="button" class="btn btn-success leftButton" id="btnGirisYap">Giris Yap</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</body>
+
+</html>
