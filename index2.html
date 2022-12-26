@@ -57,6 +57,20 @@
                 });
             });
 
+            conneciton.on("receiveMessage", data => {
+                debugger;
+                console.log("Possible Error Tutorial 6 - 58:57")
+                const _message = $("#message").clone();
+                _message.find("p").html(message);
+                $(".allMessages").append(_message);
+            })
+
+            $("#btnGonder").click(() => {
+                const clientName = $(".users.active").first().html();
+                const message = $("#txtMesaj").val();
+                conneciton.invoke("SendMessage", message, clientName).catch(error => console.log("GetNickName yordam cagirma hatasi : ", error));
+            })
+
 
         })
     </script>
@@ -90,22 +104,20 @@
                         Alert
                     </div>
                     <textarea class="form-control" style="margin-top:5px;" placeholder="İletilecek Mesajı yazınız"
-                        rows="3"></textarea>
+                        rows="3" id="txtMesaj"></textarea>
                     <button type="button" class="btn btn-light rightButton" id="btnGonder">Gönder</button>
                     <br><br><br>
 
-                    <div class="list-group">
-                        <a class="list-group-item list-group-item-action" aria-current="true">
+                    <div class="list-group allMessages">
+                        <a class="list-group-item list-group-item-action message" aria-current="true">
                             <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">Ahmet</h5>
-                                <h5 class="mb-2">Sen</h5>
+                                <h5 class="mb-1">Gönderen</h5>
+                                <h5 class="mb-2">NickName</h5>
                             </div>
-                            <p class="mb-1">Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis aspernatur
-                                officiis animi rem deleniti, distinctio quo assumenda minus eaque blanditiis repellat,
-                                totam magni nemo alias tempora facilis laboriosam ullam consequatur!</p>
-                            <small>Lorem ipsum dolor sit amet consectetur adipisicing elit. </small>
+                            <p class="mb-1">Mesaj</p>
                         </a>
                     </div>
+
                 </div>
                 <div class="col-md-3">
                     <input type="text" class="form-control form-control-lg" placeholder="Adınız/Nick" id="txtNickName">
