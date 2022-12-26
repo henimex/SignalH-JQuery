@@ -16,10 +16,11 @@
                 .withUrl("https://localhost:5001/chathub")
                 .build();
 
-                conneciton.start();
+            conneciton.start();
 
             $(".disabled").attr("disabled", "disabled");
-            $(".users").click(function () {
+
+            $("body").on("click", ".users", function () {
                 $(".users").each((index, item) => {
                     item.classList.remove("active");
                 });
@@ -44,7 +45,17 @@
                         $("#clientDurumMesajlari").fadeOut(2000)
                     }, 2000)
                 })
-            })
+            });
+
+            conneciton.on("clients", data => {
+                $("#_clients").html("");
+                $.each(data, (index, item) => {
+                    const user = $(".users").first().clone();
+                    user.removeClass("active");
+                    user.html(item.nickName);
+                    $("#_clients").append(user);
+                });
+            });
 
 
         })
@@ -65,10 +76,14 @@
                     </select>
                     <button type="button" class="btn btn-primary rightButton disabled"> Seçili Odalara Gir</button>
                     <br><br><br>
-                    <div class="list-group">
+                    <div class="list-group clients">
                         <a class="list-group-item list-group-item-action users active">Tümü</a>
-                        <a class="list-group-item list-group-item-action users" aria-current="true">Cras justo odio</a>
+                        <div id="_clients">
+
+                        </div>
                     </div>
+
+                    
                 </div>
                 <div class="col-md-6">
                     <div class="alert alert-success" id="clientDurumMesajlari" style="display: none;">
